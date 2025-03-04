@@ -1,4 +1,4 @@
-use components::{checkbox::Checkbox, gleaderboard::Gleaderboard};
+use components::{checkbox::Checkbox, gleaderboard::Gleaderboard, conditionalview::Cond};
 use leptos::prelude::*;
 use shitmap::ShitMap;
 use std::{collections::HashMap, time::Duration};
@@ -178,27 +178,20 @@ pub fn App() -> impl IntoView {
                                 style:border-color={move || format!("rgb({})", col2)}
                             >
                                 <h3 class="font-bold text-3xl text-white textshadow">{v.guild.prefix.clone()}</h3>
-
-                                {move || if show_res.get() {
-                                    Some(view! {
-                                        <div class="flex pb-1">
-                                            // this is here so that tailwinds cli realizes that this class is used
-                                            // class="hidden"
-                                            <div class="icon-emerald" class:hidden={move || !res.get().0}></div>
-                                            <div class="icon-crops" class:hidden={move || !res.get().1}></div>
-                                            <div class="icon-fish" class:hidden={move || !res.get().2}></div>
-                                            <div class="icon-ores" class:hidden={move || !res.get().3}></div>
-                                            <div class="icon-wood" class:hidden={move || !res.get().4}></div>
-                                        </div>
-                                    })} else { None }
-                                }
-
-                                {move || if show_timers.get() {
-                                    Some(view! {
-                                        <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" style={move || color}>{timestr}</h4>
-                                    })} else { None }
-                                }
-
+                                <Cond cond=show_res.get()>
+                                    <div class="flex pb-1">
+                                        // this is here so that tailwinds cli realizes that this class is used
+                                        // class="hidden"
+                                        <div class="icon-emerald" class:hidden={move || !res.get().0}></div>
+                                        <div class="icon-crops" class:hidden={move || !res.get().1}></div>
+                                        <div class="icon-fish" class:hidden={move || !res.get().2}></div>
+                                        <div class="icon-ores" class:hidden={move || !res.get().3}></div>
+                                        <div class="icon-wood" class:hidden={move || !res.get().4}></div>
+                                    </div>
+                                </Cond>
+                                <Cond cond=show_timers.get()>
+                                    <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" style={move || color}>{timestr}</h4>
+                                </Cond>
                             </div>
                         }
                     }
