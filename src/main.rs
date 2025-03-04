@@ -177,17 +177,28 @@ pub fn App() -> impl IntoView {
                                 style:background-color={move || format!("rgba({}, 0.35)", col)}
                                 style:border-color={move || format!("rgb({})", col2)}
                             >
-                                    <h3 class="font-bold text-3xl text-white textshadow">{v.guild.prefix.clone()}</h3>
-                                    <div class="flex pb-1" class:hidden={move || !show_res.get()}>
-                                        // this is here so that tailwinds cli realizes that this class is used
-                                        // class="hidden"
-                                        <div class="icon-emerald" class:hidden={move || !res.get().0}></div>
-                                        <div class="icon-crops" class:hidden={move || !res.get().1}></div>
-                                        <div class="icon-fish" class:hidden={move || !res.get().2}></div>
-                                        <div class="icon-ores" class:hidden={move || !res.get().3}></div>
-                                        <div class="icon-wood" class:hidden={move || !res.get().4}></div>
-                                    </div>
-                                    <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" class:hidden={move || !show_timers.get()} style={move || color}>{timestr}</h4>
+                                <h3 class="font-bold text-3xl text-white textshadow">{v.guild.prefix.clone()}</h3>
+
+                                {move || if show_res.get() {
+                                    Some(view! {
+                                        <div class="flex pb-1">
+                                            // this is here so that tailwinds cli realizes that this class is used
+                                            // class="hidden"
+                                            <div class="icon-emerald" class:hidden={move || !res.get().0}></div>
+                                            <div class="icon-crops" class:hidden={move || !res.get().1}></div>
+                                            <div class="icon-fish" class:hidden={move || !res.get().2}></div>
+                                            <div class="icon-ores" class:hidden={move || !res.get().3}></div>
+                                            <div class="icon-wood" class:hidden={move || !res.get().4}></div>
+                                        </div>
+                                    })} else { None }
+                                }
+
+                                {move || if show_timers.get() {
+                                    Some(view! {
+                                        <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" style={move || color}>{timestr}</h4>
+                                    })} else { None }
+                                }
+
                             </div>
                         }
                     }
