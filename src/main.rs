@@ -96,7 +96,7 @@ pub fn App() -> impl IntoView {
             </svg>
 
             // territories
-            <div class:hidden={move || !show_terrs.get()}>
+            <Cond cond=show_terrs> <div>
                 <For
                     each=move || terrs.get().into_iter()
                     key=|(k, v)| (k.clone(), v.guild.clone())
@@ -178,7 +178,7 @@ pub fn App() -> impl IntoView {
                                 style:border-color={move || format!("rgb({})", col2)}
                             >
                                 <h3 class="font-bold text-3xl text-white textshadow">{v.guild.prefix.clone()}</h3>
-                                <Cond cond=show_res.get()>
+                                <Cond cond=show_res>
                                     <div class="flex pb-1">
                                         // this is here so that tailwinds cli realizes that this class is used
                                         // class="hidden"
@@ -189,14 +189,14 @@ pub fn App() -> impl IntoView {
                                         <div class="icon-wood" class:hidden={move || !res.get().4}></div>
                                     </div>
                                 </Cond>
-                                <Cond cond=show_timers.get()>
+                                <Cond cond=show_timers>
                                     <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" style={move || color}>{timestr}</h4>
                                 </Cond>
                             </div>
                         }
                     }
                 />
-            </div>
+            </div></Cond>
         </ShitMap>
 
         // sidebar open button

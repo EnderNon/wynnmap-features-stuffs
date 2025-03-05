@@ -3,11 +3,13 @@ use leptos::prelude::*;
 #[component]
 pub fn Cond(
     #[prop(into)] cond: Signal<bool>,
-    children: Children
+    children: ChildrenFn
 ) -> impl IntoView {
-    if cond.get() {
-        Some(view! { {children()} })
-    } else {
-        None
+    move || {
+        if cond.get() {
+            Some(view! { {children()} })
+        } else {
+            None
+        }
     }
 }
