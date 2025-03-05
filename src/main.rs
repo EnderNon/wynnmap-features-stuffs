@@ -1,4 +1,4 @@
-use components::{checkbox::Checkbox, gleaderboard::Gleaderboard, conditionalview::Cond};
+use components::{checkbox::Checkbox, gleaderboard::Gleaderboard, conditionalview::{CondSig, CondSure}};
 use leptos::prelude::*;
 use shitmap::ShitMap;
 use std::{collections::HashMap, time::Duration};
@@ -96,7 +96,7 @@ pub fn App() -> impl IntoView {
             </svg>
 
             // territories
-            <Cond cond=show_terrs> <div>
+            <CondSig cond=show_terrs> <div>
                 <For
                     each=move || terrs.get().into_iter()
                     key=|(k, v)| (k.clone(), v.guild.clone())
@@ -178,25 +178,25 @@ pub fn App() -> impl IntoView {
                                 style:border-color={move || format!("rgb({})", col2)}
                             >
                                 <h3 class="font-bold text-3xl text-white textshadow">{v.guild.prefix.clone()}</h3>
-                                <Cond cond=show_res>
+                                <CondSig cond=true>
                                     <div class="flex pb-1">
                                         // this is here so that tailwinds cli realizes that this class is used
                                         // class="hidden"
-                                        <div class="icon-emerald" class:hidden={move || !res.get().0}></div>
-                                        <div class="icon-crops" class:hidden={move || !res.get().1}></div>
-                                        <div class="icon-fish" class:hidden={move || !res.get().2}></div>
-                                        <div class="icon-ores" class:hidden={move || !res.get().3}></div>
-                                        <div class="icon-wood" class:hidden={move || !res.get().4}></div>
+                                        <CondSure cond={move || res.get().0}> <div class="icon-emerald"/> </CondSure>
+                                        <CondSure cond=res.get().1> <div class="icon-crops"/> </CondSure>
+                                        <CondSure cond=res.get().2> <div class="icon-fish"/> </CondSure>
+                                        <CondSure cond=res.get().3> <div class="icon-ores"/> </CondSure>
+                                        <CondSure cond=res.get().4> <div class="icon-wood"/> </CondSure>
                                     </div>
-                                </Cond>
-                                <Cond cond=show_timers>
+                                </CondSig>
+                                <CondSig cond=show_timers>
                                     <h4 class="px-2 rounded-2xl text-sm text-center whitespace-nowrap" style={move || color}>{timestr}</h4>
-                                </Cond>
+                                </CondSig>
                             </div>
                         }
                     }
                 />
-            </div></Cond>
+            </div></CondSig>
         </ShitMap>
 
         // sidebar open button
