@@ -18,7 +18,7 @@ pub fn CondSig(
 /// Conditional view for Closure
 #[component]
 pub fn CondSure(
-    #[prop(into)] cond: impl Fn() -> bool + Send + Sync + 'static,
+    cond: impl Fn() -> bool + Send + Sync + 'static,
     children: ChildrenFn
 ) -> impl IntoView {
     move || {
