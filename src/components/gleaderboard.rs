@@ -18,50 +18,63 @@ pub fn Gleaderboard(
     #[prop(into, default = RwSignal::new(true))] show_guild_leaderboard: RwSignal<bool>,
     #[prop(into, default = false)] enable_seasons: bool,
 ) -> impl IntoView {
+    let (selected_season, scores): (
+        Option<RwSignal<Option<Arc<str>>>>,
+        Signal<Vec<GuildLeaderboardEntry>, SyncStorage>,
+    ) = if enable_seasons {
+        let selected_season: RwSignal<Option<Arc<str>>> = RwSignal::new(None::<Arc<str>>);
+        (
+            Some(selected_season),
+            Signal::derive(move || gl_ws_scores(selected_season, state)),
+        )
+    } else {
+        (None, Signal::derive(move || terr_count_score(state)))
+    };
+
     view! {
         <div class="gleaderboard">
             <hr/>
             {move ||
                 if enable_seasons {
-                    gleaderboard_with_seasons(state, show_guild_leaderboard)
+                    gleaderboard_with_seasons(show_guild_leaderboard, selected_season.unwrap())
                 } else {
                     gleaderboard_no_seasons(state, show_guild_leaderboard)
                 }
             }
+            <div class="content" class:hidden={move || !show_guild_leaderboard.get()}>
+                <hr/>
+                <GleaderboardContent scores/>
+            </div>
         </div>
+
     }
 }
 
-fn gleaderboard_with_seasons(
+fn gl_ws_scores(
+    selected_season: RwSignal<Option<Arc<str>>>,
     state: Signal<BTreeMap<Arc<str>, TerrState>>,
-    show_guild_leaderboard: RwSignal<bool>,
-) -> AnyView {
-    let seasons = RwSignal::new(SeasonList::default());
-    let selected_season = RwSignal::new(None::<Arc<str>>);
+) -> Vec<GuildLeaderboardEntry> {
+    {
+        let season_scores = LocalResource::new(move || {
+            let selected_season = selected_season.get();
 
-    update_seasondata_now_and_hourly(seasons);
+            async {
+                if let Some(s) = selected_season {
+                    let lb = datasource::load_json::<SeasonLeaderboard>(format!(
+                        "/api/v3/lb/season/{s}"
+                    ))
+                    .await;
 
-    let season_scores = LocalResource::new(move || {
-        let selected_season = selected_season.get();
-
-        async {
-            if let Some(s) = selected_season {
-                let lb =
-                    datasource::load_json::<SeasonLeaderboard>(format!("/api/v3/lb/season/{s}"))
-                        .await;
-
-                if let Ok(lb) = lb {
-                    lb.leaderboard
+                    if let Ok(lb) = lb {
+                        lb.leaderboard
+                    } else {
+                        Vec::new()
+                    }
                 } else {
                     Vec::new()
                 }
-            } else {
-                Vec::new()
             }
-        }
-    });
-
-    let scores = move || {
+        });
         if let Some(s) = season_scores.get()
             && !s.is_empty()
         {
@@ -69,7 +82,14 @@ fn gleaderboard_with_seasons(
         } else {
             terr_count_score(state)
         }
-    };
+    }
+}
+fn gleaderboard_with_seasons(
+    show_guild_leaderboard: RwSignal<bool>,
+    selected_season: RwSignal<Option<Arc<str>>>,
+) -> AnyView {
+    let seasons = RwSignal::new(SeasonList::default());
+    update_seasondata_now_and_hourly(seasons);
 
     view! {
             <div class="title" on:click={move |_| show_guild_leaderboard.update(|s| *s = !*s)}>
@@ -112,10 +132,6 @@ fn gleaderboard_with_seasons(
                 <Show when=move || !show_guild_leaderboard.get()><icons::ChevronUp size=24/></Show>
                 <Show when=move || show_guild_leaderboard.get()><icons::ChevronDown size=24/></Show>
             </div>
-            <div class="content" class:hidden={move || !show_guild_leaderboard.get()}>
-                <hr/>
-                <GleaderboardContent scores/>
-            </div>
 
     }
     .into_any()
@@ -132,10 +148,6 @@ fn gleaderboard_no_seasons(
                 <h2>"Guild leaderboard"</h2>
                 <Show when=move || !show_guild_leaderboard.get()><icons::ChevronUp size=24/></Show>
                 <Show when=move || show_guild_leaderboard.get()><icons::ChevronDown size=24/></Show>
-            </div>
-            <div class="content" class:hidden={move || !show_guild_leaderboard.get()}>
-                <hr/>
-                <GleaderboardContent scores/>
             </div>
 
     }
